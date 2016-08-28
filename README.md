@@ -1,2 +1,2 @@
-# libycase
-library by yienschwen of naive c-plus-plus data structure implementation
+#libycpp  
+Naïve implementation of some typical data structures and algorithms in c++.
