@@ -54,6 +54,7 @@ public:
         Node * ptrNode = search(varInput);
         if (ptrNode != NULL) {
             deleteNode(ptrNode);
+            count--;
             return true;
         }
         return false;
