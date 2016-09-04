@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cd $1/__test__/
+cd $1/__test__/ 
+printf "Current workding directory: \x1b[94m$(pwd)\x1b[0m\n"
 
 printf "\x1b[90m"
 # mkdir compile
@@ -15,6 +16,8 @@ fi
 echo "Cleaning all files exist in ./compile/"
 
 rm -rf ./__compile__/* -v
+rm ./*.out -v
+rm ./*.log -v
 
 printf "\x1b[92mTesting starts.\x1b[90m\n"
 
@@ -50,6 +53,7 @@ for var in *.cpp; do
     # Execution
     if [ $cext -eq 0 ]; then
         printf "\x1b[94mExecution starts.\x1b[0m\n"
+        cp ./a.out ../$var.out
         echo "------OUTPUT-STARTS------"
         ./a.out
         eext=$?
@@ -60,7 +64,6 @@ for var in *.cpp; do
         if [ $eext -ne 0 ]; then
             printf "\x1b[31mNon-zero exit code.\x1b[0m\n"
             ./a.out &> ../$var-exec.log
-            cp ./a.out ../$var.out
             printf "\x1b[91mExecution output is redirected to ../$var-exec.log.\x1b[0m\n"
             printf "\x1b[91mExecutable is copied to ../$var.out\x1b[0m\n"
         fi
