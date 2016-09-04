@@ -2,6 +2,12 @@
 
 #include "BSTree.hpp"
 
+/*
+ *  test case for BSTree:
+ *      BSTree& operator=(const BSTree&); [copy assignment]
+ */
+
+
 int main() {
     BSTree<int> bstMain;
     int a[] = {6, 5, 7, 2, 5, 8};

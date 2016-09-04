@@ -21,7 +21,7 @@ public:
         }
         this->count = bstInput.count;
     }
-    
+
     BSTree& operator=(const BSTree& bstInput) {
         return BSTree<T>(bstInput);
     }
@@ -46,6 +46,19 @@ public:
         count++;
     }
 
+    bool exist(const T& varInput) {
+        return (search(varInput) != NULL);
+    }
+
+    bool remove(const T& varInput) {
+        Node * ptrNode = search(varInput);
+        if (ptrNode != NULL) {
+            deleteNode(ptrNode);
+            return true;
+        }
+        return false;
+    }
+
     std::vector<T> inorder() {
         std::vector<T> vctInorder;
         nodeInorder(root, vctInorder);
@@ -62,12 +75,7 @@ public:
     }
 
     T min() {
-        Node* ptrCurrent = root;
-        while (ptrCurrent != NULL) {
-            if (ptrCurrent->left == NULL)
-                return ptrCurrent->key;
-            ptrCurrent = ptrCurrent->left;
-        }
+        return min(root)->key;
     }
 
     void clear() {
@@ -123,6 +131,63 @@ private:
             delete ptrNode;
             ptrNode = NULL;
         }
+    }
+
+    Node* search(const T& varInput) {
+        Node* ptrCurrent = root;
+        while (ptrCurrent != NULL) {
+            if (ptrCurrent->key == varInput)
+                return ptrCurrent;
+            else {
+                ptrCurrent = ((varInput < ptrCurrent->key) ? (ptrCurrent->left) : (ptrCurrent->right));
+            }
+        }
+        return NULL;
+    }
+
+    void transplant(Node*& ptrDest, Node*& ptrSource) {
+        // be careful with memory leak
+        if (ptrDest->parent == NULL) {
+            root = ptrSource;
+        }
+        else if (ptrDest == ptrDest->parent->left) {
+            ptrDest->parent->left = ptrSource;
+        }
+        else {
+            ptrDest->parent->right = ptrSource;
+        }
+        if (ptrSource != NULL) {
+            ptrSource->parent = ptrDest->parent;
+        }
+    }
+
+    Node* min(Node* ptrNode) {
+        while (ptrNode != NULL) {
+            if (ptrNode->left == NULL)
+                return ptrNode;
+            ptrNode = ptrNode->left;
+        }
+    }
+
+    void deleteNode(Node* ptrNode) {
+        if (ptrNode->left == NULL) {
+            transplant(ptrNode, ptrNode->right);
+        }
+        else if (ptrNode->right == NULL) {
+            transplant(ptrNode, ptrNode->left);
+        }
+        else {
+            Node* ptrSubtree = min(ptrNode->right);
+            if (ptrNode != ptrSubtree->parent) {
+                transplant(ptrSubtree, ptrSubtree->right);
+                ptrSubtree->right = ptrNode->right;
+                ptrSubtree->right->parent = ptrSubtree;
+            }
+            transplant(ptrNode, ptrSubtree);
+            ptrSubtree->left = ptrNode->left;
+            ptrSubtree->left->parent = ptrSubtree;
+        }
+        delete ptrNode;
     }
 
     Node* root;
