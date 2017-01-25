@@ -2,3 +2,9 @@
 .vscode
 *.out
 __compile__
+
+#Windows compile output
+*.exe
+*.obj
+*.pdb
+*.pch

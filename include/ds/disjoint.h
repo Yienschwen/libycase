@@ -21,7 +21,7 @@ template <class T>
             }
 
             void merge_set(const std::size_t& x, const std::size_t& y) {
-                this->link(this->find_index(x), this->find_inde(y));
+                this->link(this->find_index(x), this->find_index(y));
             }
 
             std::size_t find_set(const T& varInput) {
