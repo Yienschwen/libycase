@@ -4,62 +4,89 @@
 #include <vector>
 #include <cstddef>
 #include <utility>
-
-inline std::size_t Heap_Parent(std::size_t idx) { return ((idx - 1) / 2); }
-
-std::size_t Heap_Left(std::size_t idx) { return (2 * idx + 1); }
-
-std::size_t Heap_Right(std::size_t idx) { return (2 * (idx + 1)); }
+#include <cassert>
+#include <functional>
 
 template <class T>
-void Max_Heapify(std::vector<T>& vctInput, std::size_t idx) {
-    std::size_t sztLeft = Heap_Left(idx);
-    std::size_t sztRight = Heap_Right(idx);
-    std::size_t sztLargest;
-    if ((sztLeft < vctInput.size()) && (vctInput[sztLeft] > vctInput[idx])) {
-        sztLargest = sztLeft;
+class Heapsort {
+public:
+    static void sort(std::vector<T>& vctRef, std::function<bool(T, T)> cmp=std::less<T>()) {
+        Heapsort hpsort = Heapsort(vctRef, cmp);
+        hpsort._SortInplace();
     }
-    else {
-        sztLargest = idx;
-    }
-    if ((sztRight < vctInput.size()) && (vctInput[sztRight] > vctInput[sztLargest])) {
-        sztLargest = sztRight;
-    }
-    if (idx != sztLargest) {
-        std::swap(vctInput[idx], vctInput[sztLargest]);
-        Max_Heapify(vctInput, sztLargest);
-    }
-    
-}
 
-template <class T>
-void Build_Max_Heap(std::vector<T>& vctInput) {
-     //???
-    if (vctInput.size() != 1) {
-        std::size_t idx = Heap_Parent(vctInput.size() - 1);
-        if (idx != 0) {
-            do {
-                Max_Heapify(vctInput, idx);
-                idx--;
-            } while (idx != 0);
+private:
+    Heapsort() {}   // private default constructor
+    ~Heapsort() {}  // private default destructor
+
+    std::vector<T>& vctInput;
+    std::size_t sztHeapSize;
+    std::function<bool(T,T)> funcCmp;
+
+    // using member initializer to make compiler happy
+    // or it'll complain about reference initialization of this->vctInput
+    Heapsort(std::vector<T>& vctRef, std::function<bool(T,T)> cmp): 
+        vctInput(vctRef), sztHeapSize(vctRef.size()), funcCmp(cmp) {} 
+
+    void _SortInplace() {
+        _BuildHeap();
+        for (std::size_t i = vctInput.size() - 1; i >= 1; i--) {
+            std::swap(vctInput[0], vctInput[i]);
+            sztHeapSize -= 1;
+            _Heapify(0);
         }
     }
-}
 
-template <class T>
-std::vector<T> Heapsort(std::vector<T> vctInput) {
-    Build_Max_Heap(vctInput);
-    std::vector<T> vctReturn;
-    for (std::size_t i = vctInput.size() - 1; i >= 1; i--) {
-        std::swap(vctInput[0], vctInput[i]);
-        vctReturn.insert(vctReturn.begin(), vctInput[i]);
-        vctInput.pop_back();
-        Max_Heapify(vctInput, 0);
+    void _BuildHeap() {
+        if (vctInput.size() != 1) {
+            std::size_t idx = _Parent(vctInput.size() - 1);
+            for (;;) {
+                _Heapify(idx);
+                // this ugly branch should be avoided
+                // but what I want to avoid more is 
+                // unnecessary increment(decrement) on std::size_t
+                // which is UNSIGNED
+                if (idx != 0) {
+                    idx--;
+                }
+                else {
+                    break;
+                }
+            }
+        }
     }
-    if (vctInput.size() != 0) {
-        vctReturn.insert(vctReturn.begin(), vctInput[0]);
+
+    void _Heapify(std::size_t idx) {
+        auto sztLeft = _Left(idx);
+        auto sztRight = _Right(idx);
+        std::size_t sztToSwap;
+        if ((sztLeft < sztHeapSize) && funcCmp(vctInput[idx], vctInput[sztLeft])) {
+            sztToSwap = sztLeft;
+        }
+        else {
+            sztToSwap = idx;
+        }
+        if ((sztRight < sztHeapSize) && funcCmp(vctInput[sztToSwap], vctInput[sztRight])) {
+            sztToSwap = sztRight;
+        }
+        if (idx != sztToSwap) {
+            std::swap(vctInput[idx], vctInput[sztToSwap]);
+            _Heapify(sztToSwap);
+        }
     }
-    return vctReturn;
-}
+
+    inline std::size_t _Parent(std::size_t idx) {
+        assert(idx > 0); // prevent overflow
+        return ((idx - 1) / 2);
+    }
+
+    inline std::size_t _Left(std::size_t idx) {
+        return (2 * idx + 1);
+    }
+
+    inline std::size_t _Right(std::size_t idx) {
+        return (2 * (idx + 1));
+    }
+};
 
 #endif
